@@ -28,4 +28,10 @@ export const config = {
       trustServerCertificate: process.env.NODE_ENV !== 'production',
     },
   },
+  security: {
+    jwtSecret: process.env.JWT_SECRET || 'default-secret-key',
+    jwtExpiresIn: process.env.JWT_EXPIRES_IN || '2h',
+    jwtRememberMeExpiresIn: process.env.JWT_REMEMBER_ME_EXPIRES_IN || '30d',
+    bcryptSaltRounds: parseInt(process.env.BCRYPT_SALT_ROUNDS || '10', 10),
+  },
 };

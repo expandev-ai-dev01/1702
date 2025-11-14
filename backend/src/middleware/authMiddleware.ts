@@ -1,30 +1,26 @@
 import { Request, Response, NextFunction } from 'express';
+import jwt from 'jsonwebtoken';
 import { errorResponse } from '@/utils/apiResponse';
+import { config } from '@/config';
+import { JwtPayload } from '@/services/auth/authTypes';
 
-/**
- * @summary
- * Placeholder for authentication middleware.
- * This should be replaced with actual JWT or session validation logic.
- *
- * @important
- * For the base structure, this middleware is a pass-through.
- * It must be implemented to secure internal endpoints.
- */
 export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
-  // --- AUTHENTICATION LOGIC TO BE IMPLEMENTED ---
-  // 1. Extract token from Authorization header.
-  // 2. Verify the token (e.g., JWT verification).
-  // 3. If valid, decode it and attach user info to `req` object.
-  // 4. If invalid, send a 401 Unauthorized response.
+  const authHeader = req.headers.authorization;
 
-  // For now, we'll simulate a successful authentication for development purposes.
-  // In a real application, remove this and implement proper validation.
-  console.warn(
-    'Authentication middleware is a placeholder. All internal routes are currently unprotected.'
-  );
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json(errorResponse('Authentication token is required.'));
+  }
 
-  // Example of what a real implementation might attach to the request:
-  // req.user = { id: 1, idAccount: 1, email: 'test@example.com' };
+  const token = authHeader.split(' ')[1];
 
-  next();
+  try {
+    const decoded = jwt.verify(token, config.security.jwtSecret) as JwtPayload;
+    req.user = decoded; // Attach user payload to the request object
+    next();
+  } catch (error) {
+    if (error instanceof jwt.TokenExpiredError) {
+      return res.status(401).json(errorResponse('Session expired. Please log in again.'));
+    }
+    return res.status(401).json(errorResponse('Invalid authentication token.'));
+  }
 };

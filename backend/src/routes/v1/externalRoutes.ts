@@ -1,8 +1,9 @@
 import { Router } from 'express';
+import authRoutes from './authRoutes';
 
 const router = Router();
 
 // FEATURE INTEGRATION POINT: Add external (public) feature routes here.
-// Example: router.use('/auth', authRoutes);
+router.use('/auth', authRoutes);
 
 export default router;
